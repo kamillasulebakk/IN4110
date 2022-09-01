@@ -1,5 +1,7 @@
+Hello world from B!
+
 Here's a line
 
-Hello world from B !
+Hello world!
 
 Here's another line
