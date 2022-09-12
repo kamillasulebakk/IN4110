@@ -2,19 +2,12 @@
 Array class for assignment 2
 """
 
+from collections.abc import Sequence
+
 class Array:
 
     def __init__(self, shape, *values):
-        """Initialize an array of 1-dimensionality. Elements can only be of type:
-
-        - int
-        - float
-        - bool
-
-        Make sure the values and shape are of the correct type.
-
-        Make sure that you check that your array actually is an array, which means it is homogeneous (one data type).
-
+        """
         Args:
             shape (tuple): shape of the array as a tuple. A 1D array with n elements will have shape = (n,).
             *values: The values in the array. These should all be the same data type. Either int, float or boolean.
@@ -25,56 +18,88 @@ class Array:
             ValueError: If the number of values does not fit with the shape.
         """
 
-        # Check if the values are of valid types
+        self.array = list()
+        self.size = shape[0]
 
-        # Check that the amount of values corresponds to the shape
+        if not isinstance(shape, tuple):
+            raise TypeError('"shape" must be a tuple')
 
-        # Set class-variables
+        if not isinstance(self.size, int):
+            raise TypeError('size of array must be an integer')
 
-        pass
+        if not isinstance(values, tuple):
+            raise TypeError('"values" must be a tuple')
+
+        if all(isinstance(elem, int) for elem in values) or \
+           all(isinstance(elem, float) for elem in values) or \
+           all(isinstance(elem, bool) for elem in values):
+           pass
+        else:
+            raise ValueError('all elements in "values" must be of the same type')
+
+        if len(values) == self.size:
+            for i in range(len(values)):
+                self.array.append(values[i])
+        else:
+            raise ValueError('the number of values does not fit with the shape')
+
 
     def __str__(self):
         """Returns a nicely printable string representation of the array.
 
         Returns:
             str: A string representation of the array.
-
         """
-        pass
 
-    def __add__(self, other):
+        str_array = '('
+        for i in range(self.size):
+            str_array += str(self.array[i])
+            str_array += ' '
+        str_array += ')'
+
+        return str_array
+
+    def __getitem__(self, idx):
+        array_elem = self.array[idx]
+        return array_elem
+
+    def __add__(self, term):
         """Element-wise adds Array with another Array or number.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        Returns:
+            Array: the sum as a new array.
+        """
+        if not isinstance(term, Sequence):
+            term = [term]
+        elif len(term) != self.size:
+            return "NotImplemented"
 
-        Args:
-            other (Array, float, int): The array or number to add element-wise to this array.
+        if all (isinstance(elem, int) for elem in term) or \
+           all (isinstance(elem, float) for elem in term):
+           pass
+        else:
+            return "NotImplemented"
+
+        if len(term) == 1:
+            for i in range(self.size):
+                self.array[i] += term[0]
+        else:
+            for i in range(self.size):
+                self.array[i] += term[i]
+
+        return self.array
+
+
+    def __radd__(self, term):
+        """Element-wise adds Array with another Array or number.
 
         Returns:
             Array: the sum as a new array.
 
         """
-
-        # check that the method supports the given arguments (check for data type and shape of array)
-        # if the array is a boolean you should return NotImplemented
-
-        pass
-
-    def __radd__(self, other):
-        """Element-wise adds Array with another Array or number.
-
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
-
-        Args:
-            other (Array, float, int): The array or number to add element-wise to this array.
-
-        Returns:
-            Array: the sum as a new array.
-
-        """
-        pass
+        print('hei')
+        self.__add__(term)
+        print('hadet')
 
     def __sub__(self, other):
         """Element-wise subtracts an Array or number from this Array.
@@ -195,3 +220,21 @@ class Array:
         """
 
         pass
+
+
+    # def check_datatype(self, term):
+    #
+    #     if not isinstance(self.term, Sequence):
+    #         self.term = [self.term]
+    #     elif len(self.term) != self.size:
+    #         # return "NotImplemented"
+    #         # sys.exit()
+    #         raise ValueError
+    #
+    #     if all (isinstance(elem, int) for elem in self.term) or \
+    #        all (isinstance(elem, float) for elem in self.term):
+    #        pass
+    #     else:
+    #         # return "NotImplemented"
+    #         # sys.exit()
+    #         raise ValueError

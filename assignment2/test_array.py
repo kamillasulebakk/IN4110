@@ -8,11 +8,27 @@ from array_class import Array
 
 
 def test_str_1d():
-    pass
+    a = Array((4,), 1, 2, 3, 4)
+    # print(a.__str__())
 
+    elem = a[2]
+    # print(elem.__str__())
+
+    # a = Array((4,), 1, 2.4, 3.3, 4)
+    # print(a)
+    # assert
 
 def test_add_1d():
-    pass
+    a = Array((4,), 1, 2, 3, 4)
+    # term = 10
+    term = [10, 20, 30, 40]
+    # term = ['a', 10, 'b', 20]
+    # term = [10, 20, 30, 40, 50]
+
+    print(a.__add__(term))
+    # print(a.__radd__(term))
+
+    # print(term.__add__(a))
 
 
 def test_sub_1d():
