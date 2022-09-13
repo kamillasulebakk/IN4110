@@ -1,8 +1,7 @@
 """
 Array class for assignment 2
 """
-
-from collections.abc import Sequence
+from itertools import chain
 
 class Array:
 
@@ -20,6 +19,12 @@ class Array:
 
         self.array = list()
         self.size = shape[0]
+        self.shape_size = len(shape)
+        self.shape = shape
+
+        if self.shape_size > 1:
+            for i in range(1, self.shape_size):
+                self.size *= shape[i]
 
         if not isinstance(shape, tuple):
             raise TypeError('Shape of Array must be a tuple')
@@ -37,9 +42,17 @@ class Array:
         else:
             raise ValueError('All elements in Array must be of the same type')
 
-        if len(values) == self.size:
+        if len(values) == self.size and self.shape_size == 1:
             for i in range(len(values)):
                 self.array.append(values[i])
+        elif len(values) == self.size and self.shape_size > 1:
+            elem = 0
+            for i in range(shape[1]):
+                row_array = list()
+                for j in range(shape[0]):
+                    row_array.append(values[j+elem])
+                elem += shape[0]
+                self.array.append(row_array)
         else:
             raise ValueError('The number of values in Array does not fit with the shape')
 
@@ -69,14 +82,29 @@ class Array:
         Returns:
             Array: the sum as a new array.
         """
+
         term = self.check_type_and_values(term)
 
-        if type(term) != Array:
+        # 1d array + scalar
+        if type(term) != Array and self.shape_size == 1:
             for i in range(self.size):
                 self.array[i] += term[0]
-        else:
+        # 2d array + scalar
+        elif type(term) != Array and self.shape_size != 1:
+            for i in range(self.shape[0]):
+                for j in range(self.shape[1]):
+                    self.array[i][j] += term[0]
+        # 1d array + 1d array
+        elif term.shape_size == 1 and self.shape_size == 1:
             for i in range(self.size):
                 self.array[i] += term[i]
+        # 2d array + 2d array
+        elif term.shape_size != 1 and self.shape_size != 1:
+            for i in range(term.shape[0]):
+                for j in range(term.shape[1]):
+                    self.array[i][j] += term[i][j]
+        else:
+            raise ValueError('Could not perform the subraction')
 
         return self.array
 
@@ -98,14 +126,31 @@ class Array:
         """
         term = self.check_type_and_values(term)
 
-        if type(term) != Array:
+        # legge inn true/false statements?
+        # 1d array - scalar
+        if type(term) != Array and self.shape_size == 1:
             for i in range(self.size):
                 self.array[i] -= term[0]
-        else:
+        # 2d array - scalar
+        elif type(term) != Array and self.shape_size != 1:
+            for i in range(self.shape[0]):
+                for j in range(self.shape[1]):
+                    self.array[i][j] -= term[0]
+        # 1d array - 1d array
+        elif term.shape_size == 1 and self.shape_size == 1:
             for i in range(self.size):
                 self.array[i] -= term[i]
+        # 2d array - 2d array
+        elif term.shape_size != 1 and self.shape_size != 1:
+            for i in range(term.shape[0]):
+                for j in range(term.shape[1]):
+                    self.array[i][j] -= term[i][j]
+        else:
+            raise ValueError('Could not perform the addition')
 
         return self.array
+
+
 
     def __rsub__(self, other):
         """Element-wise subtracts this Array from a number or Array.
@@ -124,6 +169,29 @@ class Array:
             Array: a new array with every element multiplied with `other`.
         """
 
+        # # 1d array * scalar
+        # if type(term) != Array and self.shape_size == 1:
+        #     for i in range(self.size):
+        #         self.array[i] *= term[0]
+        # # 2d array * scalar
+        # elif type(term) != Array and self.shape_size != 1:
+        #     for i in range(self.shape[0]):
+        #         for j in range(self.shape[1]):
+        #             self.array[i][j] *= term[0]
+        # # 1d array * 1d array
+        # elif term.shape_size == 1 and self.shape_size == 1:
+        #     for i in range(self.size):
+        #         self.array[i] *= term[i]
+        # # 2d array - 2d array
+        # elif term.shape_size != 1 and self.shape_size != 1:
+        #     for i in range(term.shape[0]):
+        #         for j in range(term.shape[1]):
+        #             self.array[i][j] -= term[i][j]
+        # else:
+        #     raise ValueError('Could not perform the addition')
+
+
+
         self.check_type_and_values(term)
 
         if term.size == 1:
@@ -135,6 +203,23 @@ class Array:
 
         return self.array
 
+        # term = self.check_type_and_values(term)
+        #
+        # # 1d array * scalar
+        # if type(term) != Array and self.array :
+        #     for i in range(self.size):
+        #         self.array[i] *= term[0]
+        #
+        # elif term.shape_size == 1:
+        #     for i in range(self.size):
+        #         self.array[i] *= term[i]
+        # elif term.shape_size/self.shape[0] == 1:
+        #     for i in range(self.shape[1]):
+        #         for j in range(self.shape[0]):
+        #             self.array[i][j] *= term[i][j]
+        #
+        # return self.array
+
 
     def __rmul__(self, term):
         """Element-wise multiplies this Array with a number or array.
@@ -145,7 +230,7 @@ class Array:
         """
         return self.__mul__(term)
 
-    def __eq__(self, other):
+    def __eq__(self, term):
         """Compares an Array with another Array.
 
         If the two array shapes do not match, it should return False.
@@ -158,6 +243,13 @@ class Array:
             bool: True if the two arrays are equal (identical). False otherwise.
 
         """
+        if type(term) != Array:
+            return False
+        elif term.size != self.size:
+            return False
+
+        pass
+
 
 
     def is_equal(self, term):
@@ -180,6 +272,8 @@ class Array:
         """
         if term.size != self.size:
             raise ValueError('Array shapes do not match')
+
+        self.check_if_bool(term)
 
     def min_element(self):
         """Returns the smallest value of the array.
@@ -229,8 +323,25 @@ class Array:
 
 
     def check_if_bool(self, object):
+
+        if type(object) == Array:
+            if object.size >= 1:
+                object = object.flat_array()
+
         if all (isinstance(elem, int) for elem in object) or \
            all (isinstance(elem, float) for elem in object):
            pass
         else:
-            raise ValueError('NotImplemented for booleans')
+            raise TypeError('NotImplemented for booleans. Term must be an int or an Array')
+
+
+    def flat_array(self):
+       """Flattens the N-dimensional array of values into a 1-dimensional array.
+       Returns:
+           list: flat list of array values.
+       """
+       flat_array = self.array
+       for _ in range(len(self.shape[1:])):
+           flat_array = list(chain(*flat_array))
+
+       return flat_array

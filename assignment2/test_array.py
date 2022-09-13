@@ -81,7 +81,16 @@ def test_mean_1d():
 
 
 def test_add_2d():
-    pass
+    a = Array((3, 2), 8, 3, 4, 1, 6, 1)
+    b = Array((3, 2), 8, 3, 4, 1, 6, 1)
+
+
+    a = Array((3, 1), 8, 3, 4)
+    b = Array((1, 3), 8, 3, 4)
+
+
+    print(a+b)
+
 
 
 def test_mult_2d():
@@ -113,8 +122,9 @@ if __name__ == "__main__":
     test_same_1d()
     test_smallest_1d()
 
+
     # Task 6: 2d tests
-    test_add_2d()
-    test_mult_2d()
-    test_same_2d()
-    test_mean_2d()
+    # test_add_2d()
+    # test_mult_2d()
+    # test_same_2d()
+    # test_mean_2d()
