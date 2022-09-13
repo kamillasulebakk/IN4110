@@ -22,26 +22,26 @@ class Array:
         self.size = shape[0]
 
         if not isinstance(shape, tuple):
-            raise TypeError('"shape" must be a tuple')
+            raise TypeError('Shape of Array must be a tuple')
 
         if not isinstance(self.size, int):
-            raise TypeError('size of array must be an integer')
+            raise TypeError('Size of Array must be an integer')
 
         if not isinstance(values, tuple):
-            raise TypeError('"values" must be a tuple')
+            raise TypeError('Values in Array must be given as a tuple')
 
         if all(isinstance(elem, int) for elem in values) or \
            all(isinstance(elem, float) for elem in values) or \
            all(isinstance(elem, bool) for elem in values):
            pass
         else:
-            raise ValueError('all elements in "values" must be of the same type')
+            raise ValueError('All elements in Array must be of the same type')
 
         if len(values) == self.size:
             for i in range(len(values)):
                 self.array.append(values[i])
         else:
-            raise ValueError('the number of values does not fit with the shape')
+            raise ValueError('The number of values in Array does not fit with the shape')
 
 
     def __str__(self):
@@ -69,18 +69,9 @@ class Array:
         Returns:
             Array: the sum as a new array.
         """
-        if not isinstance(term, Sequence):
-            term = [term]
-        elif len(term) != self.size:
-            return "NotImplemented"
+        term = self.check_type_and_values(term)
 
-        if all (isinstance(elem, int) for elem in term) or \
-           all (isinstance(elem, float) for elem in term):
-           pass
-        else:
-            return "NotImplemented"
-
-        if len(term) == 1:
+        if type(term) != Array:
             for i in range(self.size):
                 self.array[i] += term[0]
         else:
@@ -95,72 +86,64 @@ class Array:
 
         Returns:
             Array: the sum as a new array.
-
         """
-        print('hei')
-        self.__add__(term)
-        print('hadet')
+        return self.__add__(term)
 
-    def __sub__(self, other):
+
+    def __sub__(self, term):
         """Element-wise subtracts an Array or number from this Array.
-
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
-
-        Args:
-            other (Array, float, int): The array or number to subtract element-wise from this array.
 
         Returns:
             Array: the difference as a new array.
-
         """
-        pass
+        term = self.check_type_and_values(term)
+
+        if type(term) != Array:
+            for i in range(self.size):
+                self.array[i] -= term[0]
+        else:
+            for i in range(self.size):
+                self.array[i] -= term[i]
+
+        return self.array
 
     def __rsub__(self, other):
         """Element-wise subtracts this Array from a number or Array.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
-
-        Args:
-            other (Array, float, int): The array or number being subtracted from.
-
         Returns:
             Array: the difference as a new array.
-
         """
-        pass
+        term = -term
+        self.array = -self.array
+        return self.__add__(term)
 
-    def __mul__(self, other):
+    def __mul__(self, term):
         """Element-wise multiplies this Array with a number or array.
 
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
+        Returns:
+            Array: a new array with every element multiplied with `other`.
+        """
 
-        Args:
-            other (Array, float, int): The array or number to multiply element-wise to this array.
+        self.check_type_and_values(term)
+
+        if term.size == 1:
+            for i in range(self.size):
+                self.array[i] *= term[0]
+        else:
+            for i in range(self.size):
+                self.array[i] *= term[i]
+
+        return self.array
+
+
+    def __rmul__(self, term):
+        """Element-wise multiplies this Array with a number or array.
 
         Returns:
             Array: a new array with every element multiplied with `other`.
 
         """
-        pass
-
-    def __rmul__(self, other):
-        """Element-wise multiplies this Array with a number or array.
-
-        If the method does not support the operation with the supplied arguments
-        (specific data type or shape), it should return NotImplemented.
-
-        Args:
-            other (Array, float, int): The array or number to multiply element-wise to this array.
-
-        Returns:
-            Array: a new array with every element multiplied with `other`.
-
-        """
-        # Hint: this solution/logic applies for all r-methods
-        return self.__mul__(other)
+        return self.__mul__(term)
 
     def __eq__(self, other):
         """Compares an Array with another Array.
@@ -175,9 +158,9 @@ class Array:
             bool: True if the two arrays are equal (identical). False otherwise.
 
         """
-        pass
 
-    def is_equal(self, other):
+
+    def is_equal(self, term):
         """Compares an Array element-wise with another Array or number.
 
         If `other` is an array and the two array shapes do not match, this method should raise ValueError.
@@ -195,46 +178,59 @@ class Array:
             ValueError: if the shape of self and other are not equal.
 
         """
-
-        pass
+        if term.size != self.size:
+            raise ValueError('Array shapes do not match')
 
     def min_element(self):
         """Returns the smallest value of the array.
 
-        Only needs to work for type int and float (not boolean).
-
         Returns:
             float: The value of the smallest element in the array.
-
         """
+        object = self.array
+        self.check_if_bool(object)
 
-        pass
+        temp = self.array[0]
+        for i in range(1, self.size):
+            if self.array[i] < temp:
+                temp = self.array[i]
+        min = temp
+
+        return min
+
 
     def mean_element(self):
         """Returns the mean value of an array
 
-        Only needs to work for type int and float (not boolean).
-
         Returns:
             float: the mean value
         """
+        object = self.array
+        self.check_if_bool(object)
 
-        pass
+        sum = 0
+        for i in range(self.size):
+            sum += self.array[i]
+
+        mean = sum/self.size
+
+        return mean
 
 
-    # def check_datatype(self, term):
-    #
-    #     if not isinstance(self.term, Sequence):
-    #         self.term = [self.term]
-    #     elif len(self.term) != self.size:
-    #         # return "NotImplemented"
-    #         # sys.exit()
-    #         raise ValueError
-    #
-    #     if all (isinstance(elem, int) for elem in self.term) or \
-    #        all (isinstance(elem, float) for elem in self.term):
-    #        pass
-    #     else:
-    #         # return "NotImplemented"
-    #         # sys.exit()
-    #         raise ValueError
+    def check_type_and_values(self, term):
+        if type(term) == Array and term.size != self.size:
+            raise TypeError('NotImplemented for this type. Term must be a scalar or an Array with the same shape')
+        elif type(term) != Array:
+            term = [term]
+
+        self.check_if_bool(term)
+
+        return term
+
+
+    def check_if_bool(self, object):
+        if all (isinstance(elem, int) for elem in object) or \
+           all (isinstance(elem, float) for elem in object):
+           pass
+        else:
+            raise ValueError('NotImplemented for booleans')

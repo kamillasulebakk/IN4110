@@ -9,35 +9,53 @@ from array_class import Array
 
 def test_str_1d():
     a = Array((4,), 1, 2, 3, 4)
-    # print(a.__str__())
-
     elem = a[2]
-    # print(elem.__str__())
-
-    # a = Array((4,), 1, 2.4, 3.3, 4)
-    # print(a)
-    # assert
+    assert elem == 3
+    assert str(a) == '(1 2 3 4 )'
+    # få med feilmelding her
 
 def test_add_1d():
     a = Array((4,), 1, 2, 3, 4)
-    # term = 10
-    term = [10, 20, 30, 40]
-    # term = ['a', 10, 'b', 20]
-    # term = [10, 20, 30, 40, 50]
+    assert (a + 10) == [11, 12, 13, 14]
 
-    print(a.__add__(term))
-    # print(a.__radd__(term))
+    a = Array((4,), 1, 2, 3, 4)
+    b = Array((4,), 2, 4, 6, 8)
+    sum1 = a + b
+    assert sum1 == [3, 6, 9, 12]
 
-    # print(term.__add__(a))
+    a = Array((4,), 1, 2, 3, 4)
+    b = Array((4,), 2, 4, 6, 8)
+    sum2 = b + a
+
+    assert sum1 == sum2
 
 
 def test_sub_1d():
-    pass
+    a = Array((4,), 1, 2, 3, 4)
+    assert (a - 10) == [-9, -8, -7, -6]
+
+    a = Array((4,), 1, 2, 3, 4)
+    b = Array((4,), 2, 4, 6, 8)
+    sum1 = a - b
+    assert sum1 == [-1, -2, -3, -4]
+
+    a = Array((4,), 1, 2, 3, 4)
+    b = Array((4,), 2, 4, 6, 8)
+    sum2 = b - a
+    assert sum2 == [1, 2, 3, 4]
 
 
 def test_mul_1d():
-    pass
+    a = Array((4,), 1, 2, 3, 4)
+    b = Array((4,), 1, 2, 3, 4)
+    product1 = a*b
+    assert product1 == [1, 4, 9, 16]
 
+    a = Array((4,), 1, 2, 3, 4)
+    b = Array((4,), 1, 2, 3, 4)
+    product2 = b*a
+
+    assert product1 == product2
 
 def test_eq_1d():
     pass
@@ -48,11 +66,15 @@ def test_same_1d():
 
 
 def test_smallest_1d():
-    pass
+    a = Array((10,), 6, 3, 5, 2, 1, 5, 4, 7, 8, 10)
+    min = a.min_element()
+    assert min == 1
 
 
 def test_mean_1d():
-    pass
+    a = Array((10,), 6, 3, 5, 2, 1, 5, 4, 7, 8, 10)
+    mean  = a.mean_element()
+    assert mean == 5.1
 
 
 # 2D tests (Task 6)
