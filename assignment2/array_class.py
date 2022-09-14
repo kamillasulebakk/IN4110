@@ -60,7 +60,7 @@ class Array:
             for i in range(self.len):
                 str_array += str(self.array[i])
                 str_array += ' '
-            str_array += ']'
+            str_array += '] '
         else:
             str_array = (len(self.shape)-1)*'[ '
             idx = 0
@@ -71,7 +71,7 @@ class Array:
                     str_array += ' '
                     idx += 1
                 str_array += '] '
-            str_array += ']'
+            str_array += (len(self.shape)-1)*'] '
 
         return str_array
 
@@ -252,6 +252,8 @@ class Array:
         return mean
 
 
-
+if __name__ == '__main__':
+    a = Array((2,2,2), 1, 2, 3, 4, 5, 6, 7, 8)
+    print(a)
 
 

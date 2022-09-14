@@ -58,10 +58,10 @@ def test_get_item_2d():
 
 def test_str_1d_and_2d():
     a = Array((4,), 1, 2, 3, 4)
-    assert str(a) == '[ 1 2 3 4 ]'
+    assert str(a) == '[ 1 2 3 4 ] '
 
     b = Array((3,2), 1, 2, 3, 4, 5, 6)
-    assert str(b) == '[ [ 1 2 ] [ 3 4 ] [ 5 6 ] ]'
+    assert str(b) == '[ [ 1 2 ] [ 3 4 ] [ 5 6 ] ] '
 
 
 @pytest.mark.parametrize(
@@ -149,36 +149,51 @@ def test_min_1d_and_2d(a, min):
 def test_mean_1d_and_2d(a, mean):
     assert a.mean_element() == mean
 
-
 # 3D tests
+def test_str_3d():
+    a = Array((2,2,2), 1, 2, 3, 4, 5, 6, 7, 8)
+    assert str(a) == '[ [ [ 1 2 ] [ 3 4 ] [ 5 6 ] [ 7 8 ] ] ] '
+
 @pytest.mark.parametrize(
     'a, b, c',
-    [(Array((2,2,2), 1, 2, 1, 2, 1, 2, 1, 2), 10, Array((2,2,2), 11, 12, 11, 12, 11, 12, 11, 12)),
-        (Array((2,2,2), 1, 2, 1, 2, 1, 2, 1, 2), Array((2,2,2), 1, 2, 1, 2, 1, 2, 1, 2), Array((2,2,2), 2, 4, 1, 4, 2, 4, 2, 4))]
+    [(Array((3,2,2), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 10,
+      Array((3,2,2), 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)),
+     (Array((3,2,2), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+      Array((3,2,2), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+      Array((3,2,2), 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24))]
 )
 def test_add_and_radd_3d(a, b, c):
     assert a + b == c
     assert b + a == c
 
 
-# @pytest.mark.parametrize(
-#     'a, b, c',
-#     [(Array((3,), 1, 2, 3), 10, Array((3,), -9, -8, -7)),
-#         (Array((3,), 1, 2, 3), Array((3,), 1, 2, 1), Array((3,), 0, 0, 2)),
-#         (Array((2, 3), 0, 1, 2, 3, 4, 5), 10, Array((2, 3), -10, -9, -8, -7, -6, -5)),
-#         (Array((2, 3), 0, 1, 2, 3, 4, 5), Array((2, 3), 0, 1, 2, 3, 4, 2), Array((2, 3), 0, 0, 0, 0, 0, 3))]
-# )
-# def test_sub_and_rsub_1d_and_2d(a, b, c):
-#     assert a - b == c
-#     assert b - a == -c
-#
-#
-#
-#
-#
-#
-# test_sub_3d()
-# test_mult_3d()
-# test_min_3d()
-# test_mean_3d()
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((3,2,2), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 10,
+      Array((3,2,2), -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2))]
+)
+def test_sub_and_rsub_1d_and_2d(a, b, c):
+    assert a - b == c
+    assert b - a == -c
+
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((3,2,2), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), 10,
+      Array((3,2,2), 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120)),
+     (Array((2,2,2), 1, 2, 3, 4, 5, 6, 7, 8), Array((2,2,2), 1, 2, 3, 4, 5, 6, 7, 8),
+      Array((2,2,2), 1, 4, 9, 16, 25, 36, 49, 64))]
+)
+
+def test_mul_3d(a, b, c):
+    assert a*b == c
+    assert b*a == c
+
+def test_min_3d():
+    a = Array((2,2,2), 1, 2, 3, 4, 5, 6, 0, 8)
+    assert a.min_element() == 0
+
+def test_mean_3d():
+    a = Array((2,2,2), 2, 2, 2, 2, 2, 2, 2, 2)
+    assert a.mean_element() == 2
+
 
