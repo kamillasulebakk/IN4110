@@ -2,129 +2,183 @@
 Tests for our array class
 """
 
+import pytest
+
 from array_class import Array
 
-# 1D tests (Task 4)
+# 1D and 2D tests
+
+@pytest.mark.parametrize('shape', [3, [1, 2], '1'])
+def test_shape_not_tuple_raises_TypeError(shape):
+    with pytest.raises(TypeError):
+        Array(shape, 2)
+
+@pytest.mark.parametrize('shape', [(3.0,), (1, 2.0), (1.0, 2.0, 3.0)])
+def test_shape_tuple_not_ints_raises_TypeError(shape):
+    with pytest.raises(TypeError):
+        Array(shape, 2)
+
+def test_values_wrong_type_raises_ValueError():
+    with pytest.raises(ValueError):
+        Array((3,), '1', '2', '3')
+    with pytest.raises(ValueError):
+        Array((3,), [1, 2], [3, 4], [5, 6])
+
+def test_different_types_values_raises_ValueError():
+    with pytest.raises(ValueError):
+        Array((4,), [1, 2], 3, 4, [5, 6])
+    with pytest.raises(ValueError):
+        Array((4,), '1', 2, 3, 4)
+    with pytest.raises(ValueError):
+        Array((4,), 1.0, 2, 3, 4)
 
 
-def test_str_1d():
+@pytest.mark.parametrize(
+    's, v',
+    [((3,), (1, 2)),
+        ((1, 2), (1, 2, 3)),
+        ((1, 2), 1),
+        ((1, 2, 3), (1, 2, 3, 4, 5)),
+])
+def test_shape_and_number_of_values_mismatch_raises_ValueError(s, v):
+    with pytest.raises(ValueError):
+        Array(s, v)
+
+def test_get_item_1d():
+    a = Array((5,), 0, 1, 2, 3, 4)
+    for i in range(5):
+        assert a[i] == i
+
+def test_get_item_2d():
+    a = Array((2, 3), 0, 1, 2, 3, 4, 5)
+    for i in range(2):
+        for j in range(3):
+            assert a[i][j] == i*3 + j
+
+
+def test_str_1d_and_2d():
     a = Array((4,), 1, 2, 3, 4)
-    elem = a[2]
-    assert elem == 3
-    assert str(a) == '(1 2 3 4 )'
-    # få med feilmelding her
+    assert str(a) == '[ 1 2 3 4 ]'
 
-def test_add_1d():
-    a = Array((4,), 1, 2, 3, 4)
-    assert (a + 10) == [11, 12, 13, 14]
-
-    a = Array((4,), 1, 2, 3, 4)
-    b = Array((4,), 2, 4, 6, 8)
-    sum1 = a + b
-    assert sum1 == [3, 6, 9, 12]
-
-    a = Array((4,), 1, 2, 3, 4)
-    b = Array((4,), 2, 4, 6, 8)
-    sum2 = b + a
-
-    assert sum1 == sum2
+    b = Array((3,2), 1, 2, 3, 4, 5, 6)
+    assert str(b) == '[ [ 1 2 ] [ 3 4 ] [ 5 6 ] ]'
 
 
-def test_sub_1d():
-    a = Array((4,), 1, 2, 3, 4)
-    assert (a - 10) == [-9, -8, -7, -6]
-
-    a = Array((4,), 1, 2, 3, 4)
-    b = Array((4,), 2, 4, 6, 8)
-    sum1 = a - b
-    assert sum1 == [-1, -2, -3, -4]
-
-    a = Array((4,), 1, 2, 3, 4)
-    b = Array((4,), 2, 4, 6, 8)
-    sum2 = b - a
-    assert sum2 == [1, 2, 3, 4]
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((3,), 1, 2, 3), 10, Array((3,), 11, 12, 13)),
+        (Array((3,), 1, 2, 3), Array((3,), 1, 2, 3), Array((3,), 2, 4, 6)),
+        (Array((2, 3), 0, 1, 2, 3, 4, 5), 10, Array((2, 3), 10, 11, 12, 13, 14, 15)),
+        (Array((2, 3), 0, 1, 2, 3, 4, 5), Array((2, 3), 0, 1, 2, 3, 4, 5), Array((2, 3), 0, 2, 4, 6, 8, 10))]
+)
+def test_add_and_radd_1d_and_2d(a, b, c):
+    assert a + b == c
+    assert b + a == c
 
 
-def test_mul_1d():
-    a = Array((4,), 1, 2, 3, 4)
-    b = Array((4,), 1, 2, 3, 4)
-    product1 = a*b
-    assert product1 == [1, 4, 9, 16]
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((3,), 1, 2, 3), 10, Array((3,), -9, -8, -7)),
+        (Array((3,), 1, 2, 3), Array((3,), 1, 2, 1), Array((3,), 0, 0, 2)),
+        (Array((2, 3), 0, 1, 2, 3, 4, 5), 10, Array((2, 3), -10, -9, -8, -7, -6, -5)),
+        (Array((2, 3), 0, 1, 2, 3, 4, 5), Array((2, 3), 0, 1, 2, 3, 4, 2), Array((2, 3), 0, 0, 0, 0, 0, 3))]
+)
+def test_sub_and_rsub_1d_and_2d(a, b, c):
+    assert a - b == c
+    assert b - a == -c
 
-    a = Array((4,), 1, 2, 3, 4)
-    b = Array((4,), 1, 2, 3, 4)
-    product2 = b*a
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((3,), 1, 2, 3), 10, Array((3,), 10, 20, 30)),
+        (Array((3,), 1, 2, 3), Array((3,), 1, 2, 1), Array((3,), 1, 4, 3)),
+        (Array((2, 3), 0, 1, 2, 3, 4, 5), 10, Array((2, 3), 0, 10, 20, 30, 40, 50)),
+        (Array((2, 3), 0, 1, 2, 3, 4, 5), Array((2, 3), 0, 1, 2, 3, 4, 2), Array((2, 3), 0, 1, 4, 9, 16, 10))]
+)
+def test_mul_and_rmul_1d_and_2d(a, b, c):
+    assert a*b == c
+    assert b*a == c
 
-    assert product1 == product2
+def test_eq_1d_and_2d():
+    assert Array((1,), 5) == Array((1,), 5)
+    assert Array((1,), 5) != Array((1,), 4)
+    assert Array((2,), 5, 10) != Array((1,), 4)
+    assert Array((2,), 5, -2) == Array((2,), 5, -2)
+    assert Array((2,), 5, -2) != Array((2,), 5, -1)
+    assert Array((2, 3), 0, 1, 2, 3, 4, 5) == Array((2, 3), 0, 1, 2, 3, 4, 5)
+    assert Array((6,), 0, 1, 2, 3, 4, 5) != Array((2, 3), 0, 1, 2, 3, 4, 5)
+    assert Array((3, 2), 0, 1, 2, 3, 4, 5) != Array((2, 3), 0, 1, 2, 3, 4, 5)
+    assert Array((3, 2), 0, 1, 2, 3, 4, 5) != Array((2, 3), 0, 1, 2, 3, 4, 5)
+    assert Array((2, 3), 0, 1, 2, 3, 4, 5) != Array((2, 3), 0.0, 1.0, 2.0, 3.0, 4.0, 5.0)
 
-def test_eq_1d():
-    pass
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((3,), 1, 2, 3), Array((3,), 1, 2, 3), Array((3,), True, True, True)),
+        (Array((3,), 1, 2, 3), Array((3,), 1, 1, 1), Array((3,), True, False, False)),
+        (Array((3,), 1, 2, 3), 1, Array((3,), True, False, False)),
+        (Array((3,), 1, 2, 3), 3, Array((3,), False, False, True))]
+)
+def test_is_eq_1d_and_2d(a, b, c):
+    assert a.is_equal(b) == c
 
+@pytest.mark.parametrize(
+    'a, b',
+    [(Array((3,), 1, 2, 3), Array((4,), 4, 5, 6, 7)),
+        (Array((3,2), 1, 2, 3, 4, 5, 6), Array((2,3), 1, 2, 3, 4, 5, 6))]
+)
+def test_is_eq_1d_and_2d_raises_ValueError(a, b):
+    with pytest.raises(ValueError):
+        a.is_equal(b)
 
-def test_same_1d():
-    pass
+@pytest.mark.parametrize(
+    'a, min',
+    [(Array((3,), 1, 2, 3), 1),
+        (Array((5,), 4, 2, -3, 7, 1), -3),
+        (Array((2, 3), 2, 1, 0, 3, 4, 5), 0),
+        (Array((2, 3), 1, 2, 2, 3, -4, 5), -4)]
+)
+def test_min_1d_and_2d(a, min):
+    assert a.min_element() == min
 
-
-def test_smallest_1d():
-    a = Array((10,), 6, 3, 5, 2, 1, 5, 4, 7, 8, 10)
-    min = a.min_element()
-    assert min == 1
-
-
-def test_mean_1d():
-    a = Array((10,), 6, 3, 5, 2, 1, 5, 4, 7, 8, 10)
-    mean  = a.mean_element()
-    assert mean == 5.1
-
-
-# 2D tests (Task 6)
-
-
-def test_add_2d():
-    a = Array((3, 2), 8, 3, 4, 1, 6, 1)
-    b = Array((3, 2), 8, 3, 4, 1, 6, 1)
-
-
-    a = Array((3, 1), 8, 3, 4)
-    b = Array((1, 3), 8, 3, 4)
-
-
-    print(a+b)
-
-
-
-def test_mult_2d():
-    pass
-
-
-def test_same_2d():
-    pass
-
-
-def test_mean_2d():
-    pass
-
-
-if __name__ == "__main__":
-    """
-    Note: Write "pytest" in terminal in the same folder as this file is in to run all tests
-    (or run them manually by running this file).
-    Make sure to have pytest installed (pip install pytest, or install anaconda).
-    """
-
-    # Task 4: 1d tests
-    test_str_1d()
-    test_add_1d()
-    test_sub_1d()
-    test_mul_1d()
-    test_eq_1d()
-    test_mean_1d()
-    test_same_1d()
-    test_smallest_1d()
+@pytest.mark.parametrize(
+    'a, mean',
+    [(Array((3,), 1, 2, 3), 2),
+        (Array((5,), 4, 2, -3, 7, 1), 2.2),
+        (Array((2, 3), 2, 1, 0, 3, 4, 5), 2.5),
+        (Array((2, 3), 1, 2, 2, 3, -4, 5), 1.5)]
+)
+def test_mean_1d_and_2d(a, mean):
+    assert a.mean_element() == mean
 
 
-    # Task 6: 2d tests
-    # test_add_2d()
-    # test_mult_2d()
-    # test_same_2d()
-    # test_mean_2d()
+# 3D tests
+@pytest.mark.parametrize(
+    'a, b, c',
+    [(Array((2,2,2), 1, 2, 1, 2, 1, 2, 1, 2), 10, Array((2,2,2), 11, 12, 11, 12, 11, 12, 11, 12)),
+        (Array((2,2,2), 1, 2, 1, 2, 1, 2, 1, 2), Array((2,2,2), 1, 2, 1, 2, 1, 2, 1, 2), Array((2,2,2), 2, 4, 1, 4, 2, 4, 2, 4))]
+)
+def test_add_and_radd_3d(a, b, c):
+    assert a + b == c
+    assert b + a == c
+
+
+# @pytest.mark.parametrize(
+#     'a, b, c',
+#     [(Array((3,), 1, 2, 3), 10, Array((3,), -9, -8, -7)),
+#         (Array((3,), 1, 2, 3), Array((3,), 1, 2, 1), Array((3,), 0, 0, 2)),
+#         (Array((2, 3), 0, 1, 2, 3, 4, 5), 10, Array((2, 3), -10, -9, -8, -7, -6, -5)),
+#         (Array((2, 3), 0, 1, 2, 3, 4, 5), Array((2, 3), 0, 1, 2, 3, 4, 2), Array((2, 3), 0, 0, 0, 0, 0, 3))]
+# )
+# def test_sub_and_rsub_1d_and_2d(a, b, c):
+#     assert a - b == c
+#     assert b - a == -c
+#
+#
+#
+#
+#
+#
+# test_sub_3d()
+# test_mult_3d()
+# test_min_3d()
+# test_mean_3d()
+
