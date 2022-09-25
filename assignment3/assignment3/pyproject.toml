@@ -1,9 +1,8 @@
 [build-system]
 requires = [
     "setuptools",
-    # 4110 only:
-    # "cython",
-    # "numpy==1.21.*",
+    "cython",
+    "numpy==1.21.*"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -11,12 +10,16 @@ build-backend = "setuptools.build_meta"
 version = "0.1.0"
 requires-python = ">=3.7"
 license = {text = "MIT License"}
-# name = "..."
-# description = "..."
-# readme = "..."
-# dependencies = [
-# ]
+name = "instapy"
+description = "Apply awesome filters to your images!"
+readme = "README.md"
+dependencies = [
+    "numpy",
+    "numba",
+    "pillow",
+    "line-profiler"
+]
 
 
 [project.scripts]
-# instapy = "..."
+instapy = "instapy.cli:main"
