@@ -8,6 +8,9 @@ from PIL import Image
 
 import instapy
 from . import io
+from . import python_filters
+from . import numpy_filters
+from . import numba_filters
 
 
 def run_filter(
@@ -51,3 +54,21 @@ def main(argv=None):
 
     # parse arguments and call run_filter
     ...
+
+    filename = "instapy/images/rain.jpg"
+    pixels = io.read_image(filename)
+
+    # pure python
+    sepia_image = python_filters.python_color2sepia(pixels)
+    sepia_image = Image.fromarray(sepia_image)
+    sepia_image.save("instapy/images/rain_sepia_python.jpg")
+
+    # numpy
+    sepia_image = numpy_filters.numpy_color2sepia(pixels)
+    sepia_image = Image.fromarray(sepia_image)
+    sepia_image.save("instapy/images/rain_sepia_numpy.jpg")
+
+    # numba
+    sepia_image = numba_filters.numba_color2sepia(pixels)
+    sepia_image = Image.fromarray(sepia_image)
+    sepia_image.save("instapy/images/rain_sepia_numba.jpg")

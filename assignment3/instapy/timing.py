@@ -11,6 +11,9 @@ from . import io
 from typing import Callable
 import numpy as np
 
+from .python_filters import python_color2gray, python_color2sepia
+from .numpy_filters import numpy_color2gray, numpy_color2sepia
+from .numba_filters import numba_color2gray, numba_color2sepia
 
 def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
     """Return the time for one call
@@ -30,9 +33,18 @@ def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
         time (float):
             The average time (in seconds) to run filter_function(*arguments)
     """
-    # run the filter function `calls` times
-    # return the _average_ time of one call
-    ...
+
+    mean_time = 0
+    for i in range(calls):
+        start = time.perf_counter()
+        filter_function(arguments[0])
+        stop = time.perf_counter()
+        elapsed_time = stop - start
+        mean_time += elapsed_time
+
+    mean_time /= calls
+
+    return mean_time
 
 
 def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
@@ -45,31 +57,42 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
     """
 
     # load the image
-    image = ...
-    # print the image name, width, height
-    ...
-    # iterate through the filters
-    filter_names = ...
-    for filter_name in filter_names:
-        # get the reference filter function
-        reference_filter = ...
-        # time the reference implementation
-        reference_time = ...
-        print(
-            f"Reference (pure Python) filter time {filter_name}: {reference_time:.3}s ({calls=})"
-        )
-        # iterate through the implementations
-        implementations = ...
-        for implementation in implementations:
-            filter = ...
-            # time the filter
-            filter_time = ...
-            # compare the reference time to the optimized time
-            speedup = ...
-            print(
-                f"Timing: {implementation} {filter_name}: {filter_time:.3}s ({speedup=:.2f}x)"
-            )
+    image = io.read_image(filename)
+    height, width, num_color_channels = np.shape(image)
 
+    f = open('timing-report.txt', 'w')
+    f.write(f'Timing performed using {filename}: {height}x{width}\n')
+
+    filter_names = ['color2gray', 'color2sepia']
+
+    functions = [[python_color2gray, numpy_color2gray, numba_color2gray],
+                 [python_color2sepia, numpy_color2sepia, numba_color2sepia]]
+
+
+    for i, filter_name in enumerate(filter_names):
+        reference_filter = functions[i][0]
+
+        reference_time = time_one(reference_filter, image)
+
+        f.write('\n')
+        f.write(f'Reference (pure Python) filter time {filter_name}: {reference_time:2.03f}s ({calls=})\n')
+
+        implementations = ['numpy', 'numba']
+
+
+        for j in range(1, len(functions[i])):
+            filter = functions[i][j]
+
+            filter_time = time_one(filter, image)
+
+            speedup = reference_time/filter_time
+
+            f.write(f'Timing: {implementations[j-1]} {filter_name}: {filter_time:.3}s ({speedup:.2f}x)\n')
+
+    f.close()
+
+    with open('timing-report.txt', 'r') as f:
+        print(f.read())
 
 if __name__ == "__main__":
     # run as `python -m instapy.timing`
