@@ -68,16 +68,10 @@ def main(argv=None):
     parser.add_argument("-sc", "--scale", help="Select upscaling or downscaling of image ",
                         choices = ["upscale", "downscale"], default = "upscale")
 
+    # parser.add_argument("-t", "--time", help="Select upscaling or downscaling of image ",
+    #                     choices = ["yes", "no"], default = "yes")
+    #                     -r, --runtime
     args = parser.parse_args()
 
     run_filter(args.file, args.out, args.implementation, args.filter, args.factor, args.scale)
-
-    # Add required arguments
-    ...
-
-    # parse arguments and call run_filter
-    ...
-
-    # filename = "instapy/images/rain.jpg"
-    # pixels = io.read_image(filename)
 
