@@ -14,6 +14,8 @@ import numpy as np
 from .python_filters import python_color2gray, python_color2sepia
 from .numpy_filters import numpy_color2gray, numpy_color2sepia
 from .numba_filters import numba_color2gray, numba_color2sepia
+from .cython_filters import cython_color2gray
+
 
 def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
     """Return the time for one call
@@ -33,6 +35,10 @@ def time_one(filter_function: Callable, *arguments, calls: int = 3) -> float:
         time (float):
             The average time (in seconds) to run filter_function(*arguments)
     """
+
+    # Call and compile numba's filter function in order to avoid timing compilation costs
+    if filter_function == numba_color2gray or filter_function == numba_color2sepia:
+        numba_color2gray(arguments[0])
 
     mean_time = 0
     for i in range(calls):
@@ -65,8 +71,8 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
 
     filter_names = ['color2gray', 'color2sepia']
 
-    functions = [[python_color2gray, numpy_color2gray, numba_color2gray],
-                 [python_color2sepia, numpy_color2sepia, numba_color2sepia]]
+    functions = [[python_color2gray, numpy_color2gray, numba_color2gray, cython_color2gray],
+                 [python_color2sepia, numpy_color2sepia, numba_color2sepia, cython_color2gray]]
 
 
     for i, filter_name in enumerate(filter_names):
@@ -77,7 +83,7 @@ def make_reports(filename: str = "test/rain.jpg", calls: int = 3):
         f.write('\n')
         f.write(f'Reference (pure Python) filter time {filter_name}: {reference_time:2.03f}s ({calls=})\n')
 
-        implementations = ['numpy', 'numba']
+        implementations = ['numpy', 'numba', 'cython']
 
 
         for j in range(1, len(functions[i])):

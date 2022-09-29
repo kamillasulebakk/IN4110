@@ -36,12 +36,6 @@ def python_color2sepia(image: np.array) -> np.array:
         np.array: sepia_image
     """
 
-    weights = [
-    [ 0.393, 0.769, 0.189],
-    [ 0.349, 0.686, 0.168],
-    [ 0.272, 0.534, 0.131],
-    ]
-
     height, width, num_color_channels = np.shape(image)
 
     sepia_image = np.zeros((height, width, num_color_channels))
@@ -50,9 +44,9 @@ def python_color2sepia(image: np.array) -> np.array:
         for W in range(width):
             R, G, B = image[H,W]
 
-            new_R = weights[0][0]*R + weights[0][1]*G + weights[0][2]*B
-            new_G = weights[1][0]*R + weights[1][1]*G + weights[1][2]*B
-            new_B = weights[2][0]*R + weights[2][1]*G + weights[2][2]*B
+            new_R = 0.393*R + 0.769*G + 0.189*B
+            new_G = 0.349*R + 0.686*G + 0.168*B
+            new_B = 0.272*R + 0.534*G + 0.131*B
 
             if new_R > 255:
                 new_R = 255

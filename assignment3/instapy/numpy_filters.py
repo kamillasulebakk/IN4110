@@ -22,9 +22,7 @@ def numpy_color2gray(image: np.array) -> np.array:
         for C, weight in enumerate(weights):
             gray_image[H] += image[H, :, C]*weight
 
-    gray_image = gray_image.astype("uint8")
-
-    return gray_image
+    return gray_image.astype("uint8")
 
     # return image.dot(weights).astype('uint8')
 
@@ -73,6 +71,4 @@ def numpy_color2sepia(image: np.array, k: Optional[float] = 1) -> np.array:
             sepia_image[H] = np.transpose(new_RGB)
 
     return sepia_image.astype('uint8')
-
-    # return image.dot(weights).astype('uint8')
 

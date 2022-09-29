@@ -28,8 +28,6 @@ def numba_color2gray(image: np.array) -> np.array:
 
     return gray_image.astype("uint8")
 
-# numba_color2gray = jit(python_color2gray)
-
 @jit(nopython=True)
 def numba_color2sepia(image: np.array) -> np.array:
     """Convert rgb pixel array to sepia
@@ -53,9 +51,9 @@ def numba_color2sepia(image: np.array) -> np.array:
         for W in range(width):
             R, G, B = image[H,W]
 
-            new_R = weights[0][0]*R + weights[0][1]*G + weights[0][2]*B
-            new_G = weights[1][0]*R + weights[1][1]*G + weights[1][2]*B
-            new_B = weights[2][0]*R + weights[2][1]*G + weights[2][2]*B
+            new_R = 0.393*R + 0.769*G + 0.189*B
+            new_G = 0.349*R + 0.686*G + 0.168*B
+            new_B = 0.272*R + 0.534*G + 0.131*B
 
             if new_R > 255:
                 new_R = 255
@@ -71,5 +69,3 @@ def numba_color2sepia(image: np.array) -> np.array:
 
     return sepia_image.astype('uint8')
 
-
-...
