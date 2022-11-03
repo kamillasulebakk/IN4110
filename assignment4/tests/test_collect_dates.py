@@ -1,4 +1,5 @@
 import pytest
+import collect_dates
 from collect_dates import find_dates
 from requesting_urls import get_html
 
@@ -8,6 +9,10 @@ MDY: February 12, 1954
 YMD: 2015 March 31
 ISO: 2022-04-15
 """
+
+def test_zero_pad():
+    assert collect_dates.zero_pad('2') == '02'
+    assert collect_dates.zero_pad('11') == '11'
 
 
 @pytest.mark.parametrize(

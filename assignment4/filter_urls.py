@@ -41,9 +41,7 @@ def find_urls(
 
     # finding URL matches starting with a double forward slash //
     href_pat_2slash = re.compile(r'href="(/(?:/[^:]*?)+)(?:\#.*?)?".*?', flags=re.IGNORECASE)
-    # rel2_matches = list(set(rel2_matches))  # remove duplicates
-    # start = base_url.split('//')[0]
-
+    
     if base_url:
         for anchor_tag in anchor_pat.findall(html):
             match_2slash = href_pat_2slash.search(anchor_tag)
@@ -58,7 +56,6 @@ def find_urls(
         with open(f'{output}', 'w') as f:
             for elem in url_set:
                 f.write(elem + "\n")
-            f.close()
 
     return url_set
 

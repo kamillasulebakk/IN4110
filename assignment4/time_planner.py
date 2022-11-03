@@ -30,12 +30,17 @@ def time_plan(url: str) -> str:
         markdown (str) : string containing the markdown schedule
     """
     # Get the page
-    html = ...
+    html = url
     # parse the HTML
-    soup = ...
+    response = get_html(html)
+    soup = BeautifulSoup(response, "html.parser")
+
     # locate the table
-    calendar = ...
-    soup_table = ...
+    calendar = soup.find(id="Calendar​")
+    # soup_table = calendar.find_next("table", {"class": "wikitable sortable jquery-tablesorter"})
+    soup_table = calendar.find_next("table", {"class": "wikitable"})
+
+
     # extract events into pandas data frame
     df = extract_events(soup_table)
 
@@ -62,6 +67,15 @@ def extract_events(table: bs4.element.Tag) -> pd.DataFrame:
     return:
         df (DataFrame) : DataFrame containing filtered and parsed data
     """
+
+    # # Find table rows with the <tr> tag
+    # table_rows = soup_table.find('tr')
+    # headers = table_rows.find_all('th')
+    #
+    # for i in range(len(headers)):
+    #     headers[i] = headers[i].text.strip()
+
+
     # Gets the table headers and saves their labels in `keys`
     headings = table.find_all("th")
     labels = [th.text.strip() for th in headings]
