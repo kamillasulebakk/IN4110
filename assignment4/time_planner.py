@@ -1,6 +1,7 @@
 import re
 from copy import copy
 from dataclasses import dataclass
+from typing import List
 
 import bs4
 import pandas as pd
@@ -30,16 +31,13 @@ def time_plan(url: str) -> str:
         markdown (str) : string containing the markdown schedule
     """
     # Get the page
-    html = url
+    response = get_html(url)
     # parse the HTML
-    response = get_html(html)
     soup = BeautifulSoup(response, "html.parser")
 
     # locate the table
-    calendar = soup.find(id="Calendar​")
-    # soup_table = calendar.find_next("table", {"class": "wikitable sortable jquery-tablesorter"})
+    calendar = soup.find(id="Calendar")
     soup_table = calendar.find_next("table", {"class": "wikitable"})
-
 
     # extract events into pandas data frame
     df = extract_events(soup_table)
@@ -68,51 +66,36 @@ def extract_events(table: bs4.element.Tag) -> pd.DataFrame:
         df (DataFrame) : DataFrame containing filtered and parsed data
     """
 
-    # # Find table rows with the <tr> tag
-    # table_rows = soup_table.find('tr')
-    # headers = table_rows.find_all('th')
-    #
-    # for i in range(len(headers)):
-    #     headers[i] = headers[i].text.strip()
-
-
     # Gets the table headers and saves their labels in `keys`
     headings = table.find_all("th")
-    labels = [th.text.strip() for th in headings]
-    data = []
+    labels = [th.text.strip().lower() for th in headings]
 
     # Extracts the data in table, keeping track of colspan and rowspan
-    rows = ...
-    rows = rows[1:]
-    for tr in rows:
-        cells = ...
-        row = []
-        for cell in cells:
-            colspan = ...
-            rowspan = ...
-            ...
-            text = ...
-            row.append(
-                TableEntry(
-                    text=text,
-                    rowspan=rowspan,
-                    colspan=colspan,
-                )
-            )
-        data.append(row)
+    data = extract_raw_data_from_table(table)
+
     # at this point `data` should be a table (list of lists)
     # where each item is a TableEntry with row/colspan properties
     # expand TableEntries into a dense table
-    all_data = expand_row_col_span(data)
+    dense_table = expand_row_col_span(data)
 
-    # List of desired columns
-    wanted = ...
+    desired_columns = ['date', 'venue', 'type']
+    filtered_table = filter_data(labels, dense_table, desired_columns)
+    return pd.DataFrame(filtered_table, columns=desired_columns)
 
-    # Filter data and create pandas dataframe
-    filtered_data = filter_data(labels, all_data, wanted)
-    df = ...
 
-    return df
+def extract_raw_data_from_table(table: bs4.element.Tag) -> List[List[TableEntry]]:
+    data = []
+    rows = table.find_all('tr')
+    for tr in rows[1:]:
+        cells = tr.find_all('td')
+        row = []
+        for cell in cells:
+            colspan = 1 if cell.get('colspan') is None else int(cell.get('colspan'))
+            rowspan = 1 if cell.get('rowspan') is None else int(cell.get('rowspan'))
+            text = cell.text.strip()
+            row.append(TableEntry(text, rowspan, colspan))
+        data.append(row)
+    return data
 
 
 def render_schedule(data: pd.DataFrame) -> str:
@@ -131,7 +114,7 @@ def render_schedule(data: pd.DataFrame) -> str:
         """
         return event_types.get(type_key[:2], type_key)
 
-    ...
+    return data.to_markdown()
 
 
 def strip_text(text: str) -> str:
@@ -166,14 +149,17 @@ def filter_data(keys: list, data: list, wanted: list):
             This is the subset of data in `data`,
             after discarding the columns not in `wanted`.
     """
-    ...
+    def iloc(l, target):
+        for i, e in enumerate(l):
+            if e == target:
+                return i
+
+    col_indices_to_keep = [iloc(keys, e) for e in wanted]
+    return [[row[i] for i in col_indices_to_keep] for row in data]
 
 
 def expand_row_col_span(data):
     """Applies row/colspan to tabular data
-
-    It is not required to use this function,
-    but it may be useful.
 
     - Copies cells with colspan to columns to the right
     - Copies cells with rowspan to rows below
@@ -229,12 +215,13 @@ def expand_row_col_span(data):
     # now that we've applied col/row span,
     # replace the table with the raw entries,
     # instead of the TableEntry objects
+
     return [[entry.text for entry in row] for row in new_data]
 
 
 if __name__ == "__main__":
     # test the script on the past few years by running it:
-    for year in range(20, 23):
+    for year in range(20, 21):#23):
         url = (
             f"https://en.wikipedia.org/wiki/20{year}–{year+1}_FIS_Alpine_Ski_World_Cup"
         )
