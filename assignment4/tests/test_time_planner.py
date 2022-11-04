@@ -30,13 +30,13 @@ def test_extract_events():
     table = BeautifulSoup(sample_table, "html.parser")
     events = extract_events(table)
     assert isinstance(events, pd.DataFrame)
-    assert "Date" in events.columns
-    assert "Venue" in events.columns
-    assert "Type" in events.columns
+    assert "date" in events.columns
+    assert "venue" in events.columns
+    assert "type" in events.columns
     assert len(events) == 2
-    assert list(events["Venue"]) == ["UiO", "UiO"]
-    assert list(events["Date"]) == ["October", "November"]
-    assert list(events["Type"]) == ["Assignment 3", "Assignment 4"]
+    assert list(events["venue"]) == ["UiO", "UiO"]
+    assert list(events["date"]) == ["October", "November"]
+    assert list(events["type"]) == ["Assignment 3", "Assignment 4"]
 
 
 def test_render_schedule():

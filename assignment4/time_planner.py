@@ -114,6 +114,11 @@ def render_schedule(data: pd.DataFrame) -> str:
         """
         return event_types.get(type_key[:2], type_key)
 
+    for i in range(len(data.index)):
+        old_value = data.at[i, "type"]
+        new_value = expand_event_type(old_value)
+        data['type'] = data['type'].replace([old_value], new_value)
+
     return data.to_markdown()
 
 
