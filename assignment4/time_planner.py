@@ -133,9 +133,8 @@ def strip_text(text: str) -> str:
     return:
         text (str) : the string fixed
     """
-
-    text = text[:20]  # 20 char limit
     text = re.sub(r"\[.*\]", "", text)
+    text = text[:20]  # 20 char limit
     return text
 
 

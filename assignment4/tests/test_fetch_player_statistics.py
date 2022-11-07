@@ -1,3 +1,4 @@
+import os
 from operator import itemgetter
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from fetch_player_statistics import (
     get_player_stats,
     get_players,
     get_teams,
+    project_path
 )
 
 playoff_url = "https://en.wikipedia.org/wiki/2022_NBA_playoffs"
@@ -132,7 +134,7 @@ def test_find_best_players(tmpdir):
     find_best_players(playoff_url)
 
     # make sure we created the plots in the required directory:
-    dest_dir = Path("NBA_player_statistics")
+    dest_dir = Path(os.path.join(project_path, "NBA_player_statistics"))
     assert dest_dir.exists()
     print(list(dest_dir.iterdir()))
     assert list(dest_dir.glob("points.*"))

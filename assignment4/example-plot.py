@@ -60,7 +60,7 @@ def plot_NBA_player_statistics(teams, stat="points"):
         # with the team name as the label
         bars = plt.bar(x, points, color=color, label=team)
         # add the value as text on the bars
-        plt.bar_label(bars)
+        # plt.bar_label(bars)
 
     # use the names, rotated 90 degrees as the labels for the bars
     plt.xticks(range(len(all_names)), all_names, rotation=90)

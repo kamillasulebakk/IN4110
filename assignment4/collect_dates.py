@@ -21,7 +21,6 @@ month_names = [
 
 #month names short?
 
-
 def get_date_patterns() -> Tuple[str, str, str]:
     """Return strings containing regex pattern for year, month, day
     arguments:
@@ -157,10 +156,12 @@ def find_dates(text: str, output: str = None) -> list:
         print(f"Writing to: {output}")
         with open(f'{output}', 'w') as f:
             f.write('\n'.join(dates))
+    else:
+        print(dates)
 
     return dates
 
 if __name__ == '__main__':
     # date_str = ("DMY: 2 January 2020, MDY: February 12, 1954, YMD: 2015 March 31, ISO: 2022-04-15, DMY: 22 June 2020, MDY: October 13, 2025, YMD: 2019 December 2")
     date_str = ("1900-01-01,  2025-03-15, 2022-04-15, 1000-06-12")
-    find_dates(date_str)
+    find_dates(date_str, "dates.txt")

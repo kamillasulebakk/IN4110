@@ -3,11 +3,15 @@ import re
 from operator import itemgetter
 from typing import Dict, List
 from urllib.parse import urljoin
+import unicodedata
 
 import numpy as np
 from bs4 import BeautifulSoup
 from matplotlib import pyplot as plt
+
 from requesting_urls import get_html
+from filter_urls import find_urls
+from time_planner import strip_text
 
 ## --- Task 8, 9 and 10 --- ##
 
@@ -19,7 +23,9 @@ except ImportError:
 else:
     requests_cache.install_cache()
 
+
 base_url = "https://en.wikipedia.org"
+project_path = '/Users/Kamilla/Documents/IN4110/IN3110-kisuleba/assignment4'
 
 
 def find_best_players(url: str) -> None:
@@ -33,43 +39,37 @@ def find_best_players(url: str) -> None:
     returns:
         - None
     """
-    # gets the teams
     teams = get_teams(url)
-    # assert len(teams) == 8
+    all_players = {team['name']: get_players(team['url']) for team in teams}
 
-    # Gets the player for every team and stores in dict (get_players)
-    all_players = ...
-
-    # get player statistics for each player,
-    # using get_player_stats
+    # get player statistics for each player
+    all_players_w_stats = {}
     for team, players in all_players.items():
-        ...
-
-    # at this point, we should have a dict of the form:
-    # {
-    #     "team name": [
-    #         {
-    #             "name": "player name",
-    #             "url": "https://player_url",
-    #             # added by get_player_stats
-    #             "points": 5,
-    #             "assists": 1.2,
-    #             # ...,
-    #         },
-    #     ]
-    # }
+        team_list = []
+        for player in players:
+            stats = get_player_stats(player['url'], team)
+            team_list.append({**player, **stats})
+        all_players_w_stats[team] = team_list
 
     # Select top 3 for each team by points:
-    best = {}
-    top_stat = ...
-    for team, players in all_players.items():
-        # Sort and extract top 3 based on points
-        top_3 = ...
-        ...
+    best_PPG = {}
+    best_RPG = {}
+    best_APG = {}
+    for team, players in all_players_w_stats.items():
+        # Sort and extract top 3 players in each category
+        best_PPG[team] = top_three_players(players, 'points')
+        best_RPG[team] = top_three_players(players, 'rebounds')
+        best_APG[team] = top_three_players(players, 'assists')
 
-    stats_to_plot = ...
-    for stat in stats_to_plot:
-        plot_best(best, stat=stat)
+    plot_best(best_PPG, stat="points")
+    plot_best(best_APG, stat="assists")
+    plot_best(best_RPG, stat="rebounds")
+
+
+def top_three_players(players: List[Dict], key: str) -> List[Dict]:
+    players_sorted = sorted(players, key=lambda player: player[key])
+    top_three = players[-3:]
+    return top_three
 
 
 def plot_best(best: Dict[str, List[Dict]], stat: str = "points") -> None:
@@ -97,8 +97,40 @@ def plot_best(best: Dict[str, List[Dict]], stat: str = "points") -> None:
         stat (str) : [points | assists | rebounds] which stat to plot.
             Should be a key in the player info dictionary.
     """
-    stats_dir = "NBA_player_statistics"
-    ...
+
+    count_so_far = 0
+    all_names = []
+
+    for team, players in best.items():
+        # collect the points and name of each player on the team
+        stats = []
+        names = []
+        for player in players:
+            names.append(player["name"])
+            stats.append(player[stat])
+
+        # record all the names, for use later in x label
+        all_names.extend(names)
+
+        # the position of bars is shifted by the number of players so far
+        x = range(count_so_far, count_so_far + len(players))
+        count_so_far += len(players)
+        # make bars for this team's players points,
+        # with the team name as the label
+        bars = plt.bar(x, stats, label=team)
+
+    # use the names, rotated 90 degrees as the labels for the bars
+    plt.xticks(range(len(all_names)), all_names, rotation=90)
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    # turn off gridlines
+    plt.grid(False)
+    plt.title(f"{stat} for top 3 players in all teams")
+    print(f"Creating plot of {stat} for top 3 players in all teams")
+
+    plt.tight_layout()
+    fname = os.path.join(project_path, f"NBA_player_statistics/{stat}")
+    plt.savefig(fname)
+    plt.close()
 
 
 def get_teams(url: str) -> list:
@@ -121,9 +153,7 @@ def get_teams(url: str) -> list:
     # maybe useful: identify cells that look like 'E1' or 'W5', etc.
     seed_pattern = re.compile(r"^[EW][1-8]$")
 
-    # lots of ways to do this,
-    # but one way is to build a set of team names in the semifinal
-    # and a dict of {team name: team url}
+
 
     team_links = {}  # dict of team name: team url
     in_semifinal = set()  # set of teams in the semifinal
@@ -132,12 +162,6 @@ def get_teams(url: str) -> list:
     # also locate the links tot he team pages from the First Round column
     for row in rows:
         cols = row.find_all("td")
-        # useful for showing structure
-        # print([c.get_text(strip=True) for c in cols])
-
-        # TODO:
-        # 1. if First Round column, record team link from `a` tag
-        # 2. if semifinal column, record team name
 
         # quarterfinal, E1/W8 is in column 1
         # team name, link is in column 2
@@ -153,14 +177,6 @@ def get_teams(url: str) -> list:
         elif len(cols) >= 5 and seed_pattern.match(cols[3].get_text(strip=True)):
             team_col = cols[4]
             in_semifinal.add(team_col.get_text(strip=True))
-
-    # return list of dicts (there will be 8):
-    # [
-    #     {
-    #         "name": "team name",
-    #         "url": "https://team url",
-    #     }
-    # ]
 
     assert len(in_semifinal) == 8
     return [
@@ -183,22 +199,31 @@ def get_players(team_url: str) -> list:
     print(f"Finding players in {team_url}")
 
     # Get the table
-    html = ...
-    soup = ...
-    table = ...
+    response = get_html(team_url)
+    # parse the HTML
+    soup = BeautifulSoup(response, "html.parser")
+
+    roster = soup.find(id="Roster")
+    table = roster.find_next("table", {"class": "toccolours"})
 
     players = []
-    # Loop over every row and get the names from roster
-    rows = ...
-    for row in rows:
-        # Get the columns
-        cols = ...
-        # find name links (a tags)
-        # and add to players a dict with
-        # {'name':, 'url':}
-        ...
 
-    # return list of players
+    # Loop over every row and get the names from roster
+    rows = table.find_all('tr')
+    for row in rows[3:]:
+        # Get the columns
+        cols = row.find_all('td')
+
+        player = cols[2]
+
+        url = find_urls(str(player), base_url)
+        assert len(url) == 1
+
+        player_dict = {
+            'name': unicodedata.normalize('NFKD', player.text.strip()),
+            'url': list(url)[0]
+        }
+        players.append(player_dict)
 
     return players
 
@@ -214,25 +239,31 @@ def get_player_stats(player_url: str, team: str) -> dict:
     print(f"Fetching stats for player in {player_url}")
 
     # Get the table with stats
-    html = ...
-    soup = ...
-    table = ...
+    response = get_html(player_url)
+    # parse the HTML
+    soup = BeautifulSoup(response, "html.parser")
 
-    ...
-    stats = ...
+    NBA = soup.find(id="NBA")
+    if NBA is None:
+        NBA = soup.find(id="NBA_career_statistics")
 
-    rows = ...
-
+    table = NBA.find_next("table", {"class": "wikitable"})
+    rows = table.find_all('tr')
+    stats = { key : 0.0 for key in ['points', 'rebounds', 'assists'] }
     # Loop over rows and extract the stats
-    for row in rows:
-        cols = ...
-        ...
-        # Check correct team (some players change team within season)
-        ...
+    for row in rows[1:]:
+        # Get the columns
+        cols = row.find_all('td')
+        col_year = cols[0]
+        col_team = cols[1]
 
-        # load stats from columns
-        # keys should be 'points', 'assists', etc.
-        ...
+        # Check correct team (some players change team within season)
+        if "2021–22" in col_year.text.strip() and col_team.text.strip() == team:
+            # load stats from columns
+            stats['points'] = float(cols[12].text.strip().replace('*', ''))
+            stats['rebounds'] = float(cols[8].text.strip().replace('*', ''))
+            stats['assists'] = float(cols[9].text.strip().replace('*', ''))
+            break
 
     return stats
 
@@ -241,3 +272,4 @@ def get_player_stats(player_url: str, team: str) -> dict:
 if __name__ == "__main__":
     url = "https://en.wikipedia.org/wiki/2022_NBA_playoffs"
     find_best_players(url)
+
