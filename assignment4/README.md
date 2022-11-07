@@ -29,10 +29,8 @@ python fetch_player_statistics.py
 # To test all the above implementations at once:
 pytest
 
-Specifications of urls, HTML text and other variables has to be done
-directly in the differnt files.
-
 NOTE:
+# Specifications of urls, HTML text and other variables has to be done directly in the differnt files
 # The test test_filter_urls.py has been modified so that it accepts paths that start with w
 # For the implementation to pass the tests in test_fetch_player_statistics.py one has to
   change the variable 'project_path' in fetch_player_statistics to the current directory 
