@@ -15,11 +15,11 @@ Only task 1, 2, 3 and 5 is implemented. Links on the plot webpage to the documen
 ```
 # Fetch data from https:/www.hvakosterstrommen.no/strompris-apiand visualize it (task 1):
 python3 strompris.py
-```
-You will then get a url code with port = 8000. Copy this web address and paste into your
-preferred web browser. 
 
-```
+   You will then get a url code with port = 8000. Copy this web address and paste into your
+   preferred web browser. 
+
+
 # Generate a plot of energy prices by date and display it on a web page with help page (task 2 and 3):
 python3 app.py
 
