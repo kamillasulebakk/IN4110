@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <title>Strømpris</title>
+    <!-- <header>Strømpriser i ulike deler av Norge</header> -->
+    <H1 align="center"><font style="style=color:darkblue;"> Strømpriser i ulike deler av Norge </font></H1>
     <style>
       body {
         margin: 0;
@@ -34,6 +36,19 @@
         background-color: #193498;
         color: white;
       }
+
+      .checkboxes label {
+      display: inline-block;
+      padding-right: 10px;
+      white-space: nowrap;
+      }
+      .checkboxes input {
+      vertical-align: middle;
+      }
+      .checkboxes label span {
+      vertical-align: middle;
+      }
+
     </style>
     <script
       type="text/javascript"
@@ -48,15 +63,48 @@
       src="https://cdn.jsdelivr.net/npm//vega-embed@6"
     ></script>
   </head>
-  <body>
+  <body align="center">
     <!-- Add Navigation Bar to Docs.
     -->
+    <div class="topnav">
+      <a class="active" href="/">Home</a>
+      <a href="/docs">FastAPI Docs</a>
+      <a href="/help">Help</a>
+    </div>
 
     <div id="vis"></div>
     <!-- Create Form -->
+
+    <!-- <form action="javascript:refreshPlot()" id="price-form">
+      {% for location in locations %}
+      <input type="checkbox" name="{{ location }}" value="{{ location }}" />
+      <label for="{{ location }}">{{ location }}</label>
+      <br />
+      {% endfor %}
+      <button type="submit">Refresh</button>
+    </form> -->
+
+
+
     <form action="javascript:refreshPlot()" id="price-form">
-      <!--
-      -->
+
+    <input type='checkbox' name="locations" value='NO1' id="NO1"/><label for="NO1"><span></span> Oslo </label>
+    <input type='checkbox' name="locations" value='NO2' id="NO2"/><label for="NO2"><span></span> Kristiansand </label>
+    <input type='checkbox' name="locations" value='NO3' id="NO3"/><label for="NO3"><span></span> Trondheim </label>
+    <input type='checkbox' name="locations" value='NO4' id="NO4"/><label for="NO4"><span></span> Tromsø </label>
+    <input type='checkbox' name="locations" value='NO5' id="NO5"/><label for="NO5"><span></span> Bergen </label>
+    <br />
+    <br />
+
+    <label for="end">End:</label>
+    <input type="date" id ="end" name="end" value="2022-11-30"/>
+
+    <label for="days">Days:</label>
+    <input type="number" id ="days" name="days" value=7 min=1 max=60 />
+
+
+    <button type="submit">Refresh</button>
+
     </form>
 
     <script type="text/javascript">
@@ -65,15 +113,17 @@
         const plotUrl = new URL(
           `${document.location.protocol}//${document.location.host}/plot_prices.json`
         );
+        const mplUrl = new URL(`${document.location.protocol}//${document.location.host}/plot_prices.png`)
 
         // get inputs from the form
 
         // get selected location checkboxes
         for (checkbox of document
           .getElementById("price-form")
-          .querySelectorAll("input[name=locations]")) {
+          .querySelectorAll("input[type=checkbox]")) {
           if (checkbox.checked) {
             plotUrl.searchParams.append("locations", checkbox.value);
+            mplUrl.searchParams.append("locations", checkbox.value);
           }
         }
         var endInput = document.getElementById("end");
@@ -114,5 +164,10 @@
       }
       refreshPlot();
     </script>
+
+  <br />
+  <br />
+  <br />
+  Data er hentet fra <a href="https://www.hvakosterstrommen.no">Hva koster strommen</a>
   </body>
 </html>

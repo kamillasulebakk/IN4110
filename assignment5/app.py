@@ -1,9 +1,12 @@
 import datetime
 from typing import List, Optional
 
+import uvicorn
+
 import altair as alt
 from fastapi import FastAPI, Query, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from strompris import (
     ACTIVITIES,
@@ -15,20 +18,45 @@ from strompris import (
     plot_prices,
 )
 
+from IPython.display import HTML
+
 app = FastAPI()
-templates = ...
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+def strompris(
+    request: Request,
+    location_codes = tuple(LOCATION_CODES.keys()),
+    today: datetime.date = datetime.date.today()
+) -> templates.TemplateResponse:
+
+    return templates.TemplateResponse(
+        "strompris.html",
+        {
+            "request": request,
+            "location_codes": location_codes,
+            "today": today
+        }
+    )
 
 
-# `GET /` should render the `strompris.html` template
-# with inputs:
-# - request
-# - location_codes: location code dict
-# - today: current date
+@app.get("/plot_prices.json")
+def plot_strompris(
+    locations: Optional[List[str]] = Query(default = list(LOCATION_CODES.keys())),
+    end: Optional[str] = '2022-11-30',
+    days: int = 7
+):
+    end_date = datetime.datetime.strptime(end, r'%Y-%m-%d').date()
 
-...
+    df = fetch_prices(end_date, days, locations)
+    c = plot_prices(df)
+
+    return c.to_dict()
+
+uvicorn.run(app, port=8000)
 
 
-# GET /plot_prices.json should take inputs:
+# GET /plot_prices.json should take ts:
 # - locations (list from Query)
 # - end (date)
 # - days (int, default=7)

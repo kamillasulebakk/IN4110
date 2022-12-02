@@ -72,13 +72,13 @@ def test_plot_prices():
     # could assert encodings here
 
 
-def test_plot_daily_prices():
-    # this test doesn't verify the output,
-    # only that the function works
-    df = fetch_prices(
-        end_date=datetime.date(2022, 10, 30), days=3, locations=["NO1", "NO2"]
-    )
-    chart = plot_daily_prices(df)
-    assert isinstance(chart, alt.Chart)
-    chart_dict = chart.to_dict()
-    # could assert encodings here
+# def test_plot_daily_prices():
+#     # this test doesn't verify the output,
+#     # only that the function works
+#     df = fetch_prices(
+#         end_date=datetime.date(2022, 10, 30), days=3, locations=["NO1", "NO2"]
+#     )
+#     chart = plot_daily_prices(df)
+#     assert isinstance(chart, alt.Chart)
+#     chart_dict = chart.to_dict()
+#     # could assert encodings here
