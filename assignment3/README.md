@@ -2,8 +2,6 @@
 
 Apply beautiful filters to your images with `instapy`!
 
-What filters, blabla
-
 
 ### Installation
 
