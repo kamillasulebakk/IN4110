@@ -1,6 +1,6 @@
 # Project 5: Strømpris
 
-Only task 1, 2, 3 and 5 is implemented. Links on the plot webpage to the documentation for the implementation has been produced, but the help page is not fully implemented.
+Only task 1, 2, 3 and 5 are implemented. Links on the plot webpage to the documentation for the implementation has been produced, but the help page is not fully implemented.
 
 ## This project is created with:
 * Python version: 3.7.6
